@@ -72,13 +72,13 @@ const RULES = [
         case "table-cell":
           return `| ${children} `;
         case "paragraph":
-          return `${addNewLine(children)}`;
+          return addNewLine(`${children}`);
         case "code":
-          return `\`\`\`\n${children}\n\`\`\``;
+          return addNewLine(`\`\`\`\n${children}\n\`\`\``);
         case "code-line":
           return `${children}\n`;
         case "block-quote":
-          return `${addNewLine(children.replace(/^/gm, "> "))}`;
+          return addNewLine(`${children.replace(/^/gm, "> ")}`);
         case "todo-list":
         case "bulleted-list":
         case "ordered-list":
