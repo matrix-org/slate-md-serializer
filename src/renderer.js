@@ -202,7 +202,10 @@ class Markdown {
   serializeNode(node, document) {
     if (node.object == "text") {
       const leaves = node.getLeaves();
-      return leaves.map(this.serializeLeaves);
+      const inCodeBlock = !!document.getClosest(
+        node.key, (n)=>{ n.type === 'code' }
+      );
+      return leaves.map(this.serializeLeaves, !inCodeBlock);
     }
 
     let children = node.nodes.map(node => this.serializeNode(node, document));
@@ -224,8 +227,13 @@ class Markdown {
    * @return {String}
    */
 
-  serializeLeaves(leaves) {
-    const string = new String({ text: leaves.text });
+  serializeLeaves(leaves, escape) {
+    let leavesText = leaves.text;
+    if (escape) {
+      // escape markdown characters
+      leavesText = leavesText.replace(/([\\`*{}\[\]()#+\-.!_>])/gi, "\\$1");
+    }
+    const string = new String({ text: leavesText });
     const text = this.serializeString(string);
 
     return leaves.marks.reduce((children, mark) => {
@@ -245,12 +253,9 @@ class Markdown {
    */
 
   serializeString(string) {
-    // escape markdown characters
-    const text = string.text.replace(/([\\`*{}\[\]()#+\-.!_>])/gi, "\\$1");
-
     for (const rule of this.rules) {
       if (!rule.serialize) continue;
-      const ret = rule.serialize(string, text);
+      const ret = rule.serialize(string, string.text);
       if (ret) return ret;
     }
   }
